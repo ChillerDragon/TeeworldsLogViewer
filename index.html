@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+	</head>
+	<body>
+        <style>
+            html, body {
+                background-color: rgb(38, 38, 38);
+            }
+            #container {
+                width: 99vw;
+                height: 99vh;
+                border: 1px solid grey;
+            }
+        </style>
+		<div id="container"></div>
+
+        <script src="main.js"></script>
+		<script src="../node_modules/monaco-editor/min/vs/loader.js"></script>
+		<script>
+			require.config({ paths: { vs: '../node_modules/monaco-editor/min/vs' } });
+
+			require(['vs/editor/editor.main'], async function () {
+				monaco.languages.register({
+					id: 'myCustomLanguage'
+				});
+				monaco.languages.setMonarchTokensProvider('myCustomLanguage', {
+					tokenizer: {
+						root: [
+							[/E .*/, 'custom-error'],
+							[/ I .*/, 'custom-info']
+						]
+					}
+				});
+
+				// Define a new theme that constains only rules that match this language
+				monaco.editor.defineTheme('myCoolTheme', {
+					colors: {},
+					base: 'vs-dark',
+					inherit: false,
+					rules: [
+						{ token: 'custom-info', foreground: '808080' },
+						{ token: 'custom-error', foreground: 'ff0000', fontStyle: 'bold' },
+						{ token: 'custom-notice', foreground: 'FFA500' },
+						{ token: 'custom-date', foreground: '008800' }
+					]
+				});
+
+				var editor = monaco.editor.create(document.getElementById('container'), {
+					theme: 'myCoolTheme',
+					value: await getCode(),
+					language: 'myCustomLanguage',
+                    automaticLayout: true,
+                    minimap: {
+                        enabled: false
+                    }
+				});
+			});
+		</script>
+	</body>
+</html>
