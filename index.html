@@ -20,37 +20,48 @@
 		<script src="../node_modules/monaco-editor/min/vs/loader.js"></script>
 		<script>
 			require.config({ paths: { vs: '../node_modules/monaco-editor/min/vs' } });
+			const ddnetTsPattern = '\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}'
 
 			require(['vs/editor/editor.main'], async function () {
 				monaco.languages.register({
-					id: 'myCustomLanguage'
+					id: 'ddnet-logs-lang'
 				});
-				monaco.languages.setMonarchTokensProvider('myCustomLanguage', {
+				monaco.languages.setMonarchTokensProvider('ddnet-logs-lang', {
 					tokenizer: {
 						root: [
-							[/E .*/, 'custom-error'],
-							[/ I .*/, 'custom-info']
+							[new RegExp(`^${ddnetTsPattern} I chat(resp)?: .*`), 'custom-chatresp'],
+							[new RegExp(`^${ddnetTsPattern} I motd: .*`), 'custom-motd'],
+							[new RegExp(`^${ddnetTsPattern} I gfx: GPU .*`), 'custom-gfx-gpu'],
+							[new RegExp(`^${ddnetTsPattern} I demo_recorder: .*`), 'custom-demo-recorder'],
+							[new RegExp(`^${ddnetTsPattern} I client: (version|git) .*`), 'custom-client-version'],
+							[new RegExp(`^${ddnetTsPattern} I client: (connecting|connected|disconnecting).*`), 'custom-client-connecting'],
+							[new RegExp(`^${ddnetTsPattern} I .*`), 'custom-info'],
+							[new RegExp(`^${ddnetTsPattern} E .*`), 'custom-error']
 						]
 					}
 				});
 
 				// Define a new theme that constains only rules that match this language
-				monaco.editor.defineTheme('myCoolTheme', {
+				monaco.editor.defineTheme('ddnet-logs-theme', {
 					colors: {},
 					base: 'vs-dark',
 					inherit: false,
 					rules: [
-						{ token: 'custom-info', foreground: '808080' },
-						{ token: 'custom-error', foreground: 'ff0000', fontStyle: 'bold' },
-						{ token: 'custom-notice', foreground: 'FFA500' },
-						{ token: 'custom-date', foreground: '008800' }
+						{ token: 'custom-chatresp', foreground: 'ffff87' },
+						{ token: 'custom-motd', foreground: 'ff8787' },
+						{ token: 'custom-gfx-gpu', foreground: '8787ff' },
+						{ token: 'custom-demo-recorder', foreground: 'a1a1a1' },
+						{ token: 'custom-client-version', foreground: 'afafff' },
+						{ token: 'custom-client-connecting', foreground: 'afffaf' },
+						{ token: 'custom-info', foreground: 'ffffff' },
+						{ token: 'custom-error', foreground: 'ff5f5f', fontStyle: 'bold' }
 					]
 				});
 
 				var editor = monaco.editor.create(document.getElementById('container'), {
-					theme: 'myCoolTheme',
+					theme: 'ddnet-logs-theme',
 					value: await getCode(),
-					language: 'myCustomLanguage',
+					language: 'ddnet-logs-lang',
                     automaticLayout: true,
                     minimap: {
                         enabled: false
